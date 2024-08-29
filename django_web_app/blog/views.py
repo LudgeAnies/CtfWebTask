@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.generic import (
     ListView,
@@ -16,28 +17,28 @@ from django.contrib.staticfiles.views import serve
 
 from django.db.models import Q
 
-
+@login_required
 def home(request):
     context = {
         'posts': Post.objects.all()
     }
     return render(request, 'blog/home.html', context)
 
+@login_required
 def search(request):
-    template='blog/home.html'
+    template = 'blog/home.html'
 
-    query=request.GET.get('q')
+    query = request.GET.get('q')
 
-    result=Post.objects.filter(Q(title__icontains=query) | Q(author__username__icontains=query) | Q(content__icontains=query))
+    result = Post.objects.filter(Q(title__icontains=query) | Q(author__username__icontains=query) | Q(content__icontains=query))
     paginate_by=2
-    context={ 'posts':result }
-    return render(request,template,context)
+    context = {'posts': result}
+    return render(request, template, context)
    
 
-
+@login_required
 def getfile(request):
    return serve(request, 'File')
-
 
 class PostListView(ListView):
     model = Post
@@ -45,7 +46,6 @@ class PostListView(ListView):
     context_object_name = 'posts'
     ordering = ['-date_posted']
     paginate_by = 2
-
 
 class UserPostListView(ListView):
     model = Post
